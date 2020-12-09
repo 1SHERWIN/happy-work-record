@@ -1,1 +1,1 @@
-# Scripts created for Dr. Sun lab
+# Scripts created for Sun Lab
