@@ -1,0 +1,125 @@
+3. Extract a known truth haplotype from NA12878 (ShapeIt2)
+https://samtools.github.io/bcftools/bcftools.html#common_options
+
+cd /home/s_m774/1000GenomeData/shapeit2
+wc -l * 3,874,279 
+
+conda install bcftools
+nohup bcftools view -s NA12878 ALL.chr10.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf -o indel.snv.shapeit2.NA12878.vcf &
+
+##bcftools_viewCommand=view -s NA12878 -o shapeit2.NA12878.vcf ALL.chr10.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf; Date=Sun Nov 22 18:24:49 2020
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  NA12878
+10      11501   .       C       A       .       PASS    AC=0;AN=2;DP=20462;AF=0.06;EAS_AF=0;EUR_AF=0.06;AFR_AF=0.08;AMR_AF=0.03;SAS_AF=0.1;VT=SNP;NS=2548       GT      0|0
+10      36097   .       G       A       .       PASS    AC=0;AN=2;DP=18607;AF=0.19;EAS_AF=0.26;EUR_AF=0.11;AFR_AF=0.18;AMR_AF=0.18;SAS_AF=0.25;VT=SNP;NS=2548   GT      0|0
+10      45900   .       C       T       .       PASS    AC=0;AN=2;DP=19215;AF=0;EAS_AF=0;EUR_AF=0;AFR_AF=0;AMR_AF=0;SAS_AF=0;VT=SNP;NS=2548     GT      0|0
+10      47049   .       GGA     G       .       PASS    AC=0;AN=2;DP=346770;AF=0;EAS_AF=0;EUR_AF=0;AFR_AF=0;AMR_AF=0.01;SAS_AF=0;EX_TARGET;VT=INDEL;NS=2548     GT      0|0
+10      47064   .       ACCT    A       .       PASS    AC=0;AN=2;DP=352245;AF=0;EAS_AF=0;EUR_AF=0;AFR_AF=0;AMR_AF=0;SAS_AF=0;EX_TARGET;VT=INDEL;NS=2548        GT      0|0
+10      47087   .       A       ATCC    .       PASS    AC=0;AN=2;DP=372454;AF=0;EAS_AF=0;EUR_AF=0;AFR_AF=0;AMR_AF=0;SAS_AF=0;EX_TARGET;VT=INDEL;NS=2548        GT      0|0
+10      47237   .       A       G       .       PASS    AC=0;AN=2;DP=502077;AF=0;EAS_AF=0;EUR_AF=0;AFR_AF=0;AMR_AF=0;SAS_AF=0;EX_TARGET;VT=SNP;NS=2548  GT      0|0
+
+######################################################################
+# SNV, BAM, and BAM indexes provided by /home/s_m774/1000GenomeData/ 
+######################################################################
+
+pwd
+/home/s_m774/2ndRun1000GenomeData
+
+mkdir snv
+mkdir whatshap
+mkdir whatshap/results
+mkdir whatshap/results/haplotypes
+mkdir whatshap/results/individuals
+mkdir hapseq2
+mkdir hapseq2/parsed
+mkdir hapseq2/bams
+mkdir hapseq2/results
+mkdir hapseq2/results/individuals
+mkdir dbm
+mkdir dbm/individuals
+mkdir compare
+mkdir compare/R
+
+# Reference genome
+cp /group/hon/hon3398o/0.course.files/Data/Reference/hg38/chroms/chr10.fa ./
+cp chr10.fa whatshap
+
+# fasta index
+cp /home/s_m774/1000GenomeData/chr10.fa.fai ./
+cp chr10.fa.fai whatshap
+
+# slurm scripts
+cp /home/s_m774/Haplotype-Research/bcftools.batch ./
+cp /home/s_m774/Haplotype-Research/whatshap.batch ./whatshap
+cp /home/s_m774/Haplotype-Research/hapseq2.batch ./hapseq2
+cp /home/s_m774/Haplotype-Research/dbm.batch ./dbm
+
+# scripts
+cp /home/s_m774/Haplotype-Research/getHaplotype.pl ./whatshap/results/
+cp /home/s_m774/Haplotype-Research/getAlleles.pl ./whatshap/results/
+cp /home/s_m774/software/HapSeq2/bam_parser ./hapseq2
+cp /home/s_m774/Haplotype-Research/compareHaplotype.r ./compare/R 
+
+conda activate happy
+
+# SNV are unphased at the moment
+cp /home/s_m774/1000GenomeData/*chr10.b* ./
+cp /home/s_m774/1000GenomeData/results/min50DP4.min10AD.5sample.vcf ./snv/5sample.chr10.vcf
+
+cp snv/5sample.chr10.vcf whatshap/
+cp snv/5sample.chr10.vcf hapseq2/
+cp snv/5sample.chr10.vcf dbm/
+cp *.ba* whatshap/
+cp *.ba* hapseq2/
+
+###################################
+# Haplotype phased with Whatshap
+###################################
+
+cd /home/s_m774/2ndRun1000GenomeData/whatshap
+sbatch whatshap.batch
+
+###################################
+# Haplotype phased with Hapseq2
+###################################
+
+cd /home/s_m774/2ndRun1000GenomeData/hapseq2
+sbatch hapseq2.batch
+
+
+###################################
+# Haplotype phased with DBM
+###################################
+
+cd /home/s_m774/2ndRun1000GenomeData/whatshap
+sbatch dbm.batch
+
+#################################################
+# Compared the haplotype agreement of 3 packages
+#################################################
+
+cp whatshap/results/individuals/* compare/
+cp whatshap/results/haplotypes/* compare/
+cp hapseq2/results/individuals/* compare/
+cp dbm/individuals/* compare/
+
+# Columns Key
+DBM DBM2 HAP HAP2 WHP WHP2
+T T     T T     T T
+C C     C C     C C
+A A     A A     A A
+A G     G A     G A
+G G     G G     G T
+C C     C C     C C
+C C     T C     - -
+T C     T C     C T
+
+# Paste 3 packages into a single file to eyeball agreements
+paste dbm.genotype.10837.chr10.txt hapseq2.genotype.10837.chr10.txt whatshap.haplotype.10837.chr10.txt > R/10837.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.10855.chr10.txt hapseq2.genotype.10855.chr10.txt whatshap.haplotype.10855.chr10.txt > R/10855.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12329.chr10.txt hapseq2.genotype.12329.chr10.txt whatshap.haplotype.12329.chr10.txt > R/12329.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12752.chr10.txt hapseq2.genotype.12752.chr10.txt whatshap.haplotype.12752.chr10.txt > R/12752.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12878.chr10.txt hapseq2.genotype.12878.chr10.txt whatshap.haplotype.12878.chr10.txt > R/12878.dbm.hapseq2.whatshap.6col.txt
+
+cd R
+module load R/3.6.0  
+R -f compareHaplotype.r > pairwiseHaplotype.txt

@@ -1,0 +1,781 @@
+###############################################
+# NA12878 Mother & Father download
+###############################################
+
+[s_m774@login1 1000GenomeData]$ pwd
+/home/s_m774/1000GenomeData
+
+# Click on Illumina platinum pedigree tab
+https://www.internationalgenome.org/data-portal/sample/NA12891
+https://www.internationalgenome.org/data-portal/sample/NA12892
+
+# get IGSR sample on chromosome 10
+http://www.htslib.org/doc/samtools-view.html
+-b convert to bam
+-h keep the header
+-o output 
+
+time samtools view -bh -o NA12891.chr10.bam ftp:/­/­ftp.­1000genomes.­ebi.­ac.­uk/­vol1/­ftp/­data_collections/­illumina_platinum_pedigree/­data/­CEU/­NA12891/­alignment/­NA12891.­alt_bwamem_GRCh38DH.­20150706.­CEU.­illumina_platinum_ped.­cram chr10
+time samtools view -bh -o NA12892.chr10.bam ftp:/­/­ftp.­1000genomes.­ebi.­ac.­uk/­vol1/­ftp/­data_collections/­illumina_platinum_pedigree/­data/­CEU/­NA12892/­alignment/­NA12892.­alt_bwamem_GRCh38DH.­20150706.­CEU.­illumina_platinum_ped.­cram	chr10
+
+real    7m2.589s
+user    6m23.852s
+sys     0m3.066s
+
+(happy) [s_m774@login1 1000GenomeData]$ du -h *
+2.8M    NA12891.alt_bwamem_GRCh38DH.20150706.CEU.illumina_platinum_ped.cram.crai
+3.2G    NA12891.chr10.bam
+3.0M    NA12892.alt_bwamem_GRCh38DH.20150706.CEU.illumina_platinum_ped.cram.crai
+3.3G    NA12892.chr10.bam
+
+##########################################################
+# SNV, BAM, and BAM indexes provided by /1000GenomeData/ 
+##########################################################
+
+pwd
+/home/s_m774/2ndRun1000GenomeData
+
+mkdir snv
+mkdir whatshap
+mkdir whatshap/results
+mkdir whatshap/results/haplotypes
+mkdir whatshap/results/individuals
+mkdir hapseq2
+mkdir hapseq2/parsed
+mkdir hapseq2/bams
+mkdir hapseq2/results
+mkdir hapseq2/results/individuals
+mkdir dbm
+mkdir dbm/results
+mkdir dbm/results/individuals
+mkdir compare
+mkdir compare/R
+
+# Reference genome
+cp /group/hon/hon3398o/0.course.files/Data/Reference/hg38/chroms/chr10.fa ./
+cp chr10.fa whatshap
+
+# fasta index
+cp /home/s_m774/1000GenomeData/chr10.fa.fai ./
+cp chr10.fa.fai whatshap
+
+# slurm scripts
+cp /home/s_m774/Haplotype-Research/bcftools.batch ./
+cp /home/s_m774/Haplotype-Research/whatshap.batch ./whatshap
+cp /home/s_m774/Haplotype-Research/hapseq2.batch ./hapseq2
+cp /home/s_m774/Haplotype-Research/dbm.batch ./dbm
+
+# scripts
+cp /home/s_m774/Haplotype-Research/getHaplotype.pl ./whatshap/results/
+cp /home/s_m774/Haplotype-Research/getAlleles.pl ./whatshap/results/
+cp /home/s_m774/software/HapSeq2/bam_parser ./hapseq2
+cp /home/s_m774/Haplotype-Research/compareHaplotype.r ./compare/R 
+
+conda activate happy
+
+# SNV are unphased at the moment
+cp /home/s_m774/1000GenomeData/*chr10.b* ./
+cp /home/s_m774/1000GenomeData/results/min50DP4.min10AD.5sample.vcf ./snv/5sample.chr10.vcf
+
+cp snv/5sample.chr10.vcf whatshap/
+cp snv/5sample.chr10.vcf hapseq2/
+cp snv/5sample.chr10.vcf dbm/
+cp *.ba* whatshap/
+cp *.ba* hapseq2/
+
+###################################
+# Haplotype phased with Whatshap
+###################################
+
+pwd
+/home/s_m774/2ndRun1000GenomeData/whatshap
+
+sbatch whatshap.batch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Begin running whatshap the time is ----------------------------
+Tue Oct 27 11:12:50 CDT 2020
+
+Working on 5s samples from 5 families
+======== Working on chromosome 'chr10'
+======== Writing VCF
+Done writing VCF
+
+== SUMMARY ==
+Maximum memory usage: 5.501 GB
+Time spent reading BAM/CRAM:                 1397.3 s
+Time spent parsing VCF:                         8.5 s
+Time spent selecting reads:                  1060.0 s
+Time spent phasing:                          1504.1 s
+Time spent writing VCF:                        18.3 s
+Time spent finding components:                  8.0 s
+Time spent on rest:                           650.0 s
+Total elapsed time:                          4646.3 s
+
+real    77m28.438s
+user    77m1.425s
+sys     0m22.032s
+After running whatshap, the time is ----------------------------
+Tue Oct 27 12:30:18 CDT 2020
+
+chr10   133787388       .       G       T       178.68  .       DP=659;VDB=1.55191e-24;SGB=-190.257;RPB=0.00134507;MQB=0.681137;MQSB=0.805908;BQB=3.20745e-08;MQ0F=0.0925645;AF1=0.38001;AC1=4;DP4=126,146,31,45;MQ=31;FQ=180.735;PV4=0.435063,5.25528e-08,1,0.0313023  GT:PL:AD:PS     0/0:0,14,255:61,16:.    0|1:4,0,255:79,13:133786684     0|1:129,0,190:21,10:133786684   0|1:28,0,220:43,11:133786534    0|1:63,0,255:68,20:133785921
+chr10   133787394       .       T       G       66.4923 .       DP=603;VDB=8.67295e-21;SGB=-135.274;RPB=0.771964;MQB=0.923756;MQSB=0.999998;BQB=0.00250747;MQ0F=0.0895522;AF1=0.199995;AC1=2;DP4=140,146,23,30;MQ=31;FQ=67.4609;PV4=0.549736,0.000428926,1,1    GT:PL:AD:PS     0/0:0,82,255:69,7:.     0|1:46,0,255:68,23:133786684    0|1:64,0,217:23,8:133786684    0/0:0,84,227:54,5:.      0/0:0,70,255:72,9:.
+chr10   133787400       .       T       G       201.486 .       DP=535;VDB=3.86661e-30;SGB=-159.179;RPB=0.76529;MQB=0.968951;MQSB=0.934069;BQB=0.00514927;MQ0F=0.0953271;AF1=0.300054;AC1=3;DP4=106,141,29,34;MQ=32;FQ=203.035;PV4=0.671587,0.000785542,1,0.155041      GT:PL:AD:PS     0|1:112,0,255:54,17:133785736   0|1:65,0,255:71,16:133786684    0/0:0,61,255:27,1:.     0/0:0,32,240:44,7:.     0|1:71,0,255:51,21:133785921
+chr10   133787406       .       G       T       999     .       DP=456;VDB=1.57189e-32;SGB=-142.445;RPB=0.91275211;MQB=0.97988;MQSB=0.513157;BQB=0.000621479;MQ0F=0.0701754;AF1=0.499852;G3=1.03096e-10,1,7.97899e-42;HWE=0.00848319;AC1=5;DP4=93,111,17,39;MQ=34;FQ=999;PV4=0.0474094,0.000484305,0.396366,0.223351      GT:PL:AD:PS     0|1:26,0,255:45,8:133785736    0|1:39,0,255:62,11:133786684     0|1:157,0,129:16,12:133786684   0|1:71,0,194:29,11:133786534    0|1:35,0,255:52,12:133785921
+chr10   133787412       .       T       G       999     .       DP=363;VDB=6.41735e-17;SGB=-101.806;RPB=0.699064;MQB=0.333892;MQSB=0.866028;BQB=0.0973592;MQ0F=0.0798898;AF1=0.264388;AC1=3;DP4=77,101,12,27;MQ=34;FQ=999;PV4=0.207932,0.00492189,1,0.218742    GT:PL:AD:PS     0|1:87,0,255:38,11:133785736    0|1:133,0,255:37,15:133786684   0|1:4,0,196:21,3:133786684      0/0:0,40,255:34,4:.     0/0:0,35,255:48,5:.
+
+grep -v '#' Whatshap.phased.5sample.vcf | wc -l
+359,320
+
+# Split each sample to columns POS REF ALT HAP
+grep -ve '#' Whatshap.phased.5sample.vcf | cut -f 2,4,5,10| sed s/:/\\t/g | awk '{print $1"\t"$4"\t"$2"\t"$3}' | sed s/,/\\t/g | awk '{print $1"\t"$3"\t"$4"\t"$2}'  > binary.10837.chr10.whatshap.txt
+grep -ve '#' Whatshap.phased.5sample.vcf | cut -f 2,4,5,11| sed s/:/\\t/g | awk '{print $1"\t"$4"\t"$2"\t"$3}' | sed s/,/\\t/g | awk '{print $1"\t"$3"\t"$4"\t"$2}'  > binary.10855.chr10.whatshap.txt
+grep -ve '#' Whatshap.phased.5sample.vcf | cut -f 2,4,5,12| sed s/:/\\t/g | awk '{print $1"\t"$4"\t"$2"\t"$3}' | sed s/,/\\t/g | awk '{print $1"\t"$3"\t"$4"\t"$2}'  > binary.12329.chr10.whatshap.txt
+grep -ve '#' Whatshap.phased.5sample.vcf | cut -f 2,4,5,13| sed s/:/\\t/g | awk '{print $1"\t"$4"\t"$2"\t"$3}' | sed s/,/\\t/g | awk '{print $1"\t"$3"\t"$4"\t"$2}'  > binary.12752.chr10.whatshap.txt
+grep -ve '#' Whatshap.phased.5sample.vcf | cut -f 2,4,5,14| sed s/:/\\t/g | awk '{print $1"\t"$4"\t"$2"\t"$3}' | sed s/,/\\t/g | awk '{print $1"\t"$3"\t"$4"\t"$2}'  > binary.12878.chr10.whatshap.txt
+
+# Several positions had 2 alternate alleles 
+# I handled this using the last 2 pipes to select the first alt
+10423   T       C       1|0
+10430   C       A       0/0
+10458   T       C       1|0
+10463   G       C       1|0
+10483   A       C       0/0
+10501   G       T       1|0
+10651   A       C       1/1
+10904   C       G       0|1
+10980   G       C       0|1
+10982   G       A       0|1
+
+perl getHaplotype.pl binary.10837.chr10.whatshap.txt haplotypes/whatshap.haplotype.10837.chr10.txt
+perl getHaplotype.pl binary.10855.chr10.whatshap.txt haplotypes/whatshap.haplotype.10855.chr10.txt
+perl getHaplotype.pl binary.12329.chr10.whatshap.txt haplotypes/whatshap.haplotype.12329.chr10.txt
+perl getHaplotype.pl binary.12752.chr10.whatshap.txt haplotypes/whatshap.haplotype.12752.chr10.txt
+perl getHaplotype.pl binary.12878.chr10.whatshap.txt haplotypes/whatshap.haplotype.12878.chr10.txt
+T T
+C C
+A A
+G A
+G T
+C C
+- -
+C T
+C T
+G G
+
+perl getAlleles.pl binary.10837.chr10.whatshap.txt individuals/whatshap.genotype.10837.chr10.txt
+perl getAlleles.pl binary.10855.chr10.whatshap.txt individuals/whatshap.genotype.10855.chr10.txt
+perl getAlleles.pl binary.12329.chr10.whatshap.txt individuals/whatshap.genotype.12329.chr10.txt
+perl getAlleles.pl binary.12752.chr10.whatshap.txt individuals/whatshap.genotype.12752.chr10.txt
+perl getAlleles.pl binary.12878.chr10.whatshap.txt individuals/whatshap.genotype.12878.chr10.txt
+C A
+C A
+T T
+T T
+C C
+A A
+G A
+T T
+
+#############################
+# Hapseq2 input prepared
+#############################
+
+sbatch hapseq2.batch
+
+#!/bin/bash -l
+#SBATCH -p shared
+#SBATCH -n 1
+#SBATCH --mem=60G
+#SBATCH --mail-type=END,FAIL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=sherwin@txstate.edu    # Where to send mail
+#SBATCH --output=slurm-hapseq2.out
+
+echo "Begin running Hapseq2 the time is ----------------------------"
+
+date;
+
+# Hapseq2 needs 2 input files sites.txt and counts.txt
+grep -v "#" 5sample.chr10.vcf | awk '{print $1"\t"$2"\t.\t" $4"\t"$5 "\t100\tPASS\t."}' > chr10.hapseq.vcf
+
+# I only keep the primary alternate allele as multiple alleles is unsupported by Hapseq2
+awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$6"\t"$7"\t"$8"\t"$5}' chr10.hapseq.vcf | sed s/,/\\t/g | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$8"\t"$5"\t"$6"\t"$7}' > singleAllele.chr10.hapseq.vcf
+
+# Prepared sites file
+cut -f 2,4,5 singleAllele.chr10.hapseq.vcf > sites.chr10.txt
+
+# each bam needs to be indexed with filename __.bam.bai
+mv NA10837.chr10.bai NA10837.chr10.bam.bai
+mv NA10855.chr10.bai NA10855.chr10.bam.bai
+mv NA12329.chr10.bai NA12329.chr10.bam.bai
+mv NA12752.chr10.bai NA12752.chr10.bam.bai
+mv NA12878.chr10.bai NA12878.chr10.bam.bai
+
+# Ran Bam parsers
+mv *.bam* bams
+time ./bam_parser bams/NA10837.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA10837 1;
+time ./bam_parser bams/NA10855.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA10855 2;
+time ./bam_parser bams/NA12329.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12329 3;
+time ./bam_parser bams/NA12752.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12752 4;
+time ./bam_parser bams/NA12878.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12878 5;
+
+# Prepared counts file
+cat parsed/*.count.txt > counts.chr10.txt
+
+# Hapseq2 phasing
+# --readCounts is the counts file
+# --polymorphicSites is a list of SNP sites
+# -o output file
+# --phase
+time /home/s_m774/software/HapSeq2/hapseq2  --readCounts counts.chr10.txt --polymorphicSites sites.chr10.txt -o phased.chr10.hapseq.txt --phase
+
+######################################################
+
+# Coverted alleles to uppercase using awk
+# -d delimiter
+# -f field 
+cut -d " " -f 3 phased.chr10.hapseq.txt | awk '{ print toupper($1) }' | sed 's/./& /g' > results/transposeHapSeq2.txt
+
+awk -F' ' '{print NF; exit}' transposeHapSeq2.txt
+
+# Transpose using awk: https://stackoverflow.com/a/1729980
+awk '
+{
+    for (i=1; i<=NF; i++)  {
+        a[NR,i] = $i
+    }
+}
+NF>p { p = NF }
+END {
+    for(j=1; j<=p; j++) {
+        str=a[1,j]
+        for(i=2; i<=NR; i++){
+            str=str" "a[i,j];
+        }
+        print str
+    }
+}' transposeHapSeq2.txt > table.hapseq2.chr10.5sample.txt    
+
+wc -l table.hapseq2.chr10.5sample.txt
+
+# split each sample
+cut -f 1,2 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.10837.chr10.txt
+cut -f 3,4 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.10855.chr10.txt
+cut -f 5,6 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12329.chr10.txt
+cut -f 7,8 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12752.chr10.txt
+cut -f 9,10 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12878.chr10.txt
+
+wc -l *
+
+echo "After running Hapseq2, the time is ----------------------------"
+
+date;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+grep -v "#" 5sample.chr10.vcf | awk '{print $1"\t"$2"\t.\t" $4"\t"$5 "\t100\tPASS\t."}' > chr10.hapseq.vcf
+chr10   46025   .       C       A       100     PASS    .
+chr10   46026   .       C       A       100     PASS    .
+chr10   47663   .       C       T       100     PASS    .
+chr10   47754   .       T       C       100     PASS    .
+chr10   47771   .       C       T       100     PASS    .
+chr10   47774   .       A       C       100     PASS    .
+
+# I only keep the primary alternate allele as multiple alleles is unsupported by Hapseq2
+awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$6"\t"$7"\t"$8"\t"$5}' chr10.hapseq.vcf | sed s/,/\\t/g | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$8"\t"$5"\t"$6"\t"$7}' > singleAllele.chr10.hapseq.vcf
+
+# Prepared sites file
+cut -f 2,4,5 singleAllele.chr10.hapseq.vcf > sites.chr10.txt
+47754   T       C
+47771   C       T
+47774   A       C
+1183069 G       A
+1183111 G       T
+1183505 C       A
+
+
+# each bam needs to be indexed with filename __.bam.bai
+
+mv NA10837.chr10.bai NA10837.chr10.bam.bai
+mv NA10855.chr10.bai NA10855.chr10.bam.bai
+mv NA12329.chr10.bai NA12329.chr10.bam.bai
+mv NA12752.chr10.bai NA12752.chr10.bam.bai
+mv NA12878.chr10.bai NA12878.chr10.bam.bai
+
+# Ran Bam parsers
+mv *.bam* bams
+time ./bam_parser bams/NA10837.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA10837 1;
+time ./bam_parser bams/NA10855.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA10855 2;
+time ./bam_parser bams/NA12329.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12329 3;
+time ./bam_parser bams/NA12752.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12752 4;
+time ./bam_parser bams/NA12878.chr10.bam singleAllele.chr10.hapseq.vcf parsed/chr10.NA12878 5;
+
+sbatch bamparser.batch
+Submitted batch job 374570
+
+Begin running bam_parser, the time is ----------------------------
+Fri Oct 30 14:27:24 CDT 2020
+bam_parser started...
+loaded 16215152 entries; 286402 of them are non-ref-non-alt
+
+done writing count, jump, and read files
+
+real    24m51.096s
+user    24m3.479s
+sys     0m47.148s
+...
+bam_parser started...
+loaded 15046454 entries; 271081 of them are non-ref-non-alt
+
+done writing count, jump, and read files
+
+real    24m55.585s
+user    24m9.174s
+sys     0m46.163s
+After running bam_parser, the time is ----------------------------
+Fri Oct 30 16:31:06 CDT 2020
+
+# Prepared counts file
+cat parsed/*.count.txt > counts.chr10.txt
+1 1 0 0 1 1 1 39 19 0 24 0 42 14 15 0 23 0 138 0 111 0 121 22 49 0 0 1 4 88 40 0 30 0 22 3 5 0 54 0 20 5 0 170 0 18 31 158 78 4 14 5 2 80 63 0 2 73 0 51 0 61 0 16 16 1 1 1 1 0 56 0 6 0 3 17 30 0 1 0 0 0 0 0 0 39 0 0 186 0 8 0 17 148 50 3 67 8 2 0 78 10 29 13 3 0 180 0 15 177 23 0 6 0 0 0 12 0 12 1 230 0 52 2 153 0 192 0 0 0 228 0 3 0 3 0 13 0 6 0 0 1 150 0 123 1 0 1 0 0 4 0 6 0 4 0 0 0 0 0 2 0 4 0 2 0 2 31 14 0 7 0 10 0 11 0 18 2 0 0 1 0 2 0 19 54 211 0 2 0 12 131 36 0 139 0 2 5 0 15 1 0 0 0 13 0 17 20 55 0 159 0 94 0 6 0 3 0 0 4 1 3 0 71 19 87 19 0 119 77 26 137 46 10 1 20 9 0 0 0 2 0 2 0 0
+1 1 0 0 1 0 0 59 3 26 4 31 6 24 0 0 21 0 118 0 90 0 102 6 33 0 0 0 0 0 79 0 12 0 9 0 4 0 72 0 22 17 0 0 152 36 0 144 27 10 0 2 0 83 30 0 4 70 0 41 0 52 0 35 0 0 6 0 6 0 55 0 4 0 3 29 7 3 8 1 0 1 17 1 17 20 9 0 152 0 5 0 15 29 87 3 53 9 0 0 57 20 21 7 3 1 122 0 16 0 196 0 11 0 0 3 9 0 2 116 74 38 33 1 171 124 75 0 1 0 263 9 0 9 0 1 4 9 4 0 0 0 141 0 98 0 2 0 2 0 0 0 11 1 0 0 4 0 4 1 9 0 18 0 4 0 1 44 0 2 21 14 8 0 4 0 2 0 2 0 2 0 2 0 9 260 1 0 0 20 0 86 37 0 120 0 8 0 9 8 16 0 0 5 14 1 8 19 34 0 145 0 120 0 6 0 3 0 2 0 16 0 4 0 75 0 98 0 127 0 115 0 182 0 9 0 53 0 3 0 0 0 2 2 0
+1 1 0 0 1 0 2 1 143 20 0 47 25 45 0 0 84 163 201 0 191 0 214 85 67 0 2 0 3 0 200 0 44 0 37 8 7 0 160 1 74 7 7 183 160 48 39 0 410 15 2 4 5 150 167 0 4 0 116 50 35 52 41 43 19 3 4 3 4 0 113 0 12 0 3 42 32 0 2 2 3 2 9 1 9 36 33 169 147 1 4 16 12 0 263 95 0 34 0 155 0 43 36 21 1 144 133 30 0 132 142 6 6 0 2 17 8 0 20 179 162 75 49 0 243 0 325 0 9 226 181 1 5 1 3 0 32 12 11 0 8 0 276 0 195 2 4 2 4 0 7 0 16 0 9 0 4 0 5 17 0 19 0 0 4 3 6 0 74 0 5 0 15 0 3 0 38 0 3 5 5 7 0 0 20 469 0 0 3 37 0 2 283 0 236 0 6 0 14 0 39 0 7 0 39 0 27 0 169 0 280 0 239 0 16 1 4 0 6 7 5 5 7 83 92 78 106 125 121 217 0 168 203 22 0 29 51 2 1 0 4 0 5 1 1
+
+###################################
+# Haplotype phased with Hapseq2
+###################################
+
+# --readCounts is the counts file
+# --polymorphicSites is a list of SNP sites
+# -o output file
+# --phase
+time /home/s_m774/software/HapSeq2/hapseq2  --readCounts counts.chr10.txt --polymorphicSites sites.chr10.txt -o phased.chr10.hapseq.txt --phase
+
+1->1 HAPLO1 tcaggctttgtgcatcggtttcgcgattcgccctcgcatcaccacccccctgtcctcgtcgaggtgccgcctgtgcggccagcgtcctcggccgctaggccacccctgggtccgacggcaagacaagtcagctcggccccatctccaggataggctgctggagtctccggaaactgttgctccgaatatcgcgtagggggcaatccgtccaacgccccggccgccccctgcatgcccgcgttacctacttacgctagttcccattccgtcaggcgccgtcagtccgcgtatagcataccctcgaggcccactacgggggtccacttaaaaccgagccaaaactgcccgtgttttccggcacatgagtccataatggccaatcgcgccgtaggccaggaggcgtcaaagtagttggggatacgacgaccgggcgtattacccctcacagccgcataagctcggggacaaaagagcccattggtgtcgcggccacgcgccctgcctgtcttcctctgcgaagggcccccggggggacgtcagacaccagcaccttactaatttgtggccccccttcatgagggccgtggggtacgagtcctacggccggctccaaaacgttcaggtatta
+1->1 HAPLO2 tcaagccccgtgcatcggattgtgtggccgccctcacgcactcacccctttgcattggtcggggtgccgccggtgcggccggggtacctagtcgctaggccactgttgggtacgactgcccgacaagatcgctcgggcctgggatcgggatgcggcgctcgtctctccggaaactggggccccgaatatcacggggggcgcgattcgttaccacgaaatcctacgccccacacacctgcgttacctacttacgctagttccagttctgacagcggccgccagtcagtgtccggcataccctcgagcctcactacgggggtccatccccagccgaggcaaaaccgcccgtgttgtccggcgcatgaggccatcccggtcaatcgttccttgagccgggaggcttctaagtcgcggttgctacgagaaccgggcgtattacccatcgcagtcgcctaccctcggggcagccagcgcctactggctccgcgaccacgcgccgtgtttttcttcctctgcgacaggcacttgggggtccgtcagaaaccaacactctcctgcgttgtggccccctcccaggaaggccgtggtgtacgagtcgtacggccggcttcaaaccgcgtaggcttgg
+2->2 HAPLO1 tcaggcctctagcatcggtttctgtgtccgacctcacgtcaccacccccttgccttggtcggggtgccaccggtgcggctggcgtccccggccacgaggccactcctggatctgacggcccgacaagaccgctcgggcccatgtccgcgatacgctgttcgagtgtcctggaactgttgccccgaatattgcgggcggcgcgattcatcaaaacgacctcctgccccccacacgcctgcgttacctactttcgctggttccagttccgtcggccgccgccagtacatgtatagcatacactcgaagccagcgacggggatccacccccagccgagccaaaactgtccgagttgtcccggacatgaatccatcatggtcgatcgttccgtaagccgggaggtgtcaaagtcgcgggggctacgagggccggacgtattacccctcatagcctccaaagctcaaggccgccggagcctattggcgccgcgaccacatgccgtgccgttcttcttctgcaacgggtcctcgggggtccgtcagtcctcagcattttacggagttgtggccccttcccatgaggactgtggggtacgagtcgtacggccggcttcaaaacgcttaggcttga
+2->2 HAPLO2 tcaggccccgtgcccctgattggcgagcctccctcacgtactcacccccctgtcctggtcggggtgccagcggtgcggctggggtcctcagccgctaggccactcctgagtccgacggcaagacaaaatagctcgggtccagcaccaggataggccgtagttctctccggaaactgttgccccgaatatcacgtagggcgcaagttgtcccccgccaaggccgcgccccgcacgcctgcattaactgcttacgctagttccagtcccgtcagccgccgccagtacatgtatggcttaccctcgcggcccactacggaggatctcccccaaccgagccaaacctgcccatttctctcggcaagccagtccatcataatcgttcgtgtcgcaagccgggaggcgtcaaagtcgcgggggatactcgggccgggcgtattaccgctcattttcgcaaaacttcgggtaaaaaagagtccattggcgccgcggtcacgcttcgtgcctttcttcctctgcggagggccctcgggggtcagtcagacaccagcgctttcctgagttgtggctccctcccatgagagccgtggggtacgagtccaacggccggcttcgacccgttcaggcttga
+
+Wrote out file [phased.chr10.hapseq.txt] with phased chromosomes ...
+Wrote out file [phased.chr10.hapseq.txt.rec] with mosaic crossover rates ...
+Wrote out file [phased.chr10.hapseq.txt.erate] with per marker error rates ...
+
+real    0m4.927s
+user    0m4.219s
+sys     0m0.685s
+
+# Coverted alleles to uppercase using awk
+# -d delimiter
+# -f field 
+
+cut -d " " -f 3 phased.chr10.hapseq.txt | awk '{ print toupper($1) }' | sed 's/./& /g' > results/transposeHapSeq2.txt
+T C A G G C T T T G T G C A T C G G T T T C G C G A T T C G C C C T C G C A T C A C C A C C C C C C T G T C C T C G T C G A G G T G C C G C C T G T G C G G C C A G C G T C C T C G G C C G C T A G G C C A C C C C T G G G T C C G A C G G C A A G A C A A G T C A G C T C G G C C C C A T C T C C A G G A T A G G C T G C T G G A G T C T C C G G A A A C T G T T G C T C C G A A T A T C G C G T A G G G G G C A A T C C G T C C A A C G C C C C G G C C G C C C C C T G C A T G C C C G C G T T A C C T A C T T A C G C T A G T T C C C A T T C C G T C A G G C G C C G T C A G T C C G C G T A T A G C A T A C C C T C G A G G C C C A C T A C G G G G G T C C A C T T A A A A C C G A G C C A A A A C T G C C C G T G T T T T C C G G C A C A T G A G T C C A T A A T G G C C A A T C G C G C C G T A G G C C A G G A G G C G T C A A A G T A G T T G G G G A T A C G A C G A C C G G G C G T A T T A C C C C T C A C A G C C G C A T A A G C T C G G G G A C A A A A G A G C C C A T T G G T G T C G C G G C C A C G C G C C C T G C C T G T C T T C C T C T G C G A A G G G C C C C C G G G G G G A C G T C A G A C A C C A G C A C C T T A C T A A T T T G T G G C C C C C C T T C A T G A G G G C C G T G G G G T A C G A G T C C T A C G G C C G G C T C C A A A A C G T T C A G G T A T T A
+T C A A G C C C C G T G C A T C G G A T T G T G T G G C C G C C C T C A C G C A C T C A C C C C T T T G C A T T G G T C G G G G T G C C G C C G G T G C G G C C G G G G T A C C T A G T C G C T A G G C C A C T G T T G G G T A C G A C T G C C C G A C A A G A T C G C T C G G G C C T G G G A T C G G G A T G C G G C G C T C G T C T C T C C G G A A A C T G G G G C C C C G A A T A T C A C G G G G G G C G C G A T T C G T T A C C A C G A A A T C C T A C G C C C C A C A C A C C T G C G T T A C C T A C T T A C G C T A G T T C C A G T T C T G A C A G C G G C C G C C A G T C A G T G T C C G G C A T A C C C T C G A G C C T C A C T A C G G G G G T C C A T C C C C A G C C G A G G C A A A A C C G C C C G T G T T G T C C G G C G C A T G A G G C C A T C C C G G T C A A T C G T T C C T T G A G C C G G G A G G C T T C T A A G T C G C G G T T G C T A C G A G A A C C G G G C G T A T T A C C C A T C G C A G T C G C C T A C C C T C G G G G C A G C C A G C G C C T A C T G G C T C C G C G A C C A C G C G C C G T G T T T T T C T T C C T C T G C G A C A G G C A C T T G G G G G T C C G T C A G A A A C C A A C A C T C T C C T G C G T T G T G G C C C C C T C C C A G G A A G G C C G T G G T G T A C G A G T C G T A C G G C C G G C T T C A A A C C G C G T A G G C T T G G
+T C A G G C C T C T A G C A T C G G T T T C T G T G T C C G A C C T C A C G T C A C C A C C C C C T T G C C T T G G T C G G G G T G C C A C C G G T G C G G C T G G C G T C C C C G G C C A C G A G G C C A C T C C T G G A T C T G A C G G C C C G A C A A G A C C G C T C G G G C C C A T G T C C G C G A T A C G C T G T T C G A G T G T C C T G G A A C T G T T G C C C C G A A T A T T G C G G G C G G C G C G A T T C A T C A A A A C G A C C T C C T G C C C C C C A C A C G C C T G C G T T A C C T A C T T T C G C T G G T T C C A G T T C C G T C G G C C G C C G C C A G T A C A T G T A T A G C A T A C A C T C G A A G C C A G C G A C G G G G A T C C A C C C C C A G C C G A G C C A A A A C T G T C C G A G T T G T C C C G G A C A T G A A T C C A T C A T G G T C G A T C G T T C C G T A A G C C G G G A G G T G T C A A A G T C G C G G G G G C T A C G A G G G C C G G A C G T A T T A C C C C T C A T A G C C T C C A A A G C T C A A G G C C G C C G G A G C C T A T T G G C G C C G C G A C C A C A T G C C G T G C C G T T C T T C T T C T G C A A C G G G T C C T C G G G G G T C C G T C A G T C C T C A G C A T T T T A C G G A G T T G T G G C C C C T T C C C A T G A G G A C T G T G G G G T A C G A G T C G T A C G G C C G G C T T C A A A A C G C T T A G G C T T G A
+
+awk -F' ' '{print NF; exit}' transposeHapSeq2.txt
+359320
+
+# Transpose using awk: https://stackoverflow.com/a/1729980
+awk '
+{
+    for (i=1; i<=NF; i++)  {
+        a[NR,i] = $i
+    }
+}
+NF>p { p = NF }
+END {
+    for(j=1; j<=p; j++) {
+        str=a[1,j]
+        for(i=2; i<=NR; i++){
+            str=str" "a[i,j];
+        }
+        print str
+    }
+}' transposeHapSeq2.txt > table.hapseq2.chr10.5sample.txt    
+T T T T T T T C C T
+C C C C C C T C C T
+A A A A A A C A A C
+G A G G A A G G G A
+G G G G G G G G G G
+C C C C C C C C C C
+T C C C C C C C C C
+T C T C T T C C C T
+T C C C T T C C T C
+G G T G G G G G G G
+T T A T A A A A T T
+G G G G G G A G G G
+
+wc -l table.hapseq2.chr10.5sample.txt
+359320 table.hapseq2.chr10.5sample.txt
+
+# split each sample
+cut -f 1,2 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.10837.chr10.txt
+cut -f 3,4 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.10855.chr10.txt
+cut -f 5,6 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12329.chr10.txt
+cut -f 7,8 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12752.chr10.txt
+cut -f 9,10 -d ' ' table.hapseq2.chr10.5sample.txt > individuals/hapseq2.genotype.12878.chr10.txt
+T T
+C C
+A A
+G A
+G G
+C C
+T C
+T C
+T C
+
+wc -l *
+ 359320 hapseq2.genotype.10837.chr10.txt
+ 359320 hapseq2.genotype.10855.chr10.txt
+ 359320 hapseq2.genotype.12329.chr10.txt
+ 359320 hapseq2.genotype.12752.chr10.txt
+ 359320 hapseq2.genotype.12878.chr10.txt
+
+#############################
+# DBM input prepared
+#############################
+
+#!/bin/bash -l
+#SBATCH -p shared
+#SBATCH -n 1
+#SBATCH --mem=60G
+#SBATCH --mail-type=END,FAIL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=sherwin@txstate.edu    # Where to send mail
+#SBATCH --output=slurm-dbm.out
+
+echo "Begin running DBM the time is ----------------------------"
+
+date;
+
+# DBM needs 2 inputs: chr10.snps and chr10.counts
+
+# I only keep the primary alternate allele as multiple alleles is unsupported by Hapseq2
+grep -v "#" 5sample.chr10.vcf | awk '{print NR"\t"$1"\t"$2"\t"$6"\t"$4"\t"$5}' > chr10.5sample.snps
+
+# Extract allele count in each sample
+grep -v "#" 5sample.chr10.vcf | cut -f 10 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.10837.count
+grep -v "#" 5sample.chr10.vcf | cut -f 11 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.10855.count
+grep -v "#" 5sample.chr10.vcf | cut -f 12 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12329.count
+grep -v "#" 5sample.chr10.vcf | cut -f 13 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12752.count
+grep -v "#" 5sample.chr10.vcf | cut -f 14 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12878.count
+
+# paste each sample side by side
+awk '{print "M\t"NR}' chr10.10837.count | paste - chr10.10837.count chr10.10855.count chr10.12329.count chr10.12752.count chr10.12878.count > chr10.5sample.counts
+
+time /home/s_m774/software/DBM/dbm chr10.5sample
+
+# Split each sample
+sed '1d' chr10.5sample.g > noHeader.chr10.5sample.g
+cut -f 4,5 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.10837.chr10.txt
+cut -f 6,7 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.10855.chr10.txt
+cut -f 8,9 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12329.chr10.txt
+cut -f 10,11 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12752.chr10.txt
+cut -f 12,13 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12878.chr10.txt
+
+wc -l *
+
+echo "After running DBM, the time is ----------------------------"
+
+date;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# DBM needs 2 inputs: chr10.snps and chr10.counts
+
+# I only keep the primary alternate allele as multiple alleles is unsupported by Hapseq2
+grep -v "#" 5sample.chr10.vcf | awk '{print NR"\t"$1"\t"$2"\t"$6"\t"$4"\t"$5}' > chr10.5sample.snps
+1       chr10   10423   999     T       C
+2       chr10   10430   170.487 C       A
+3       chr10   10458   166.025 T       C
+4       chr10   10463   999     G       C
+5       chr10   10483   114.494 A       C
+
+# Extract allele count in each sample
+grep -v "#" 5sample.chr10.vcf | cut -f 10 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.10837.count
+grep -v "#" 5sample.chr10.vcf | cut -f 11 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.10855.count
+grep -v "#" 5sample.chr10.vcf | cut -f 12 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12329.count
+grep -v "#" 5sample.chr10.vcf | cut -f 13 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12752.count
+grep -v "#" 5sample.chr10.vcf | cut -f 14 | sed 's/:/\t/g' | cut -f 3 | sed 's/,/\t/g' > chr10.12878.count
+0       0
+0       0
+0       0
+7       0
+5       0
+5       0
+0       0
+
+real    0m0.018s
+user    0m0.018s
+sys     0m0.009s
+
+# paste each sample side by side
+awk '{print "M\t"NR}' chr10.10837.count | paste - chr10.10837.count chr10.10855.count chr10.12329.count chr10.12752.count chr10.12878.count > chr10.5sample.counts
+
+# Inserted DBM header 
+# -i is insert
+# 1s to insert at the top of file
+I       SID     I1      I1      I2      I2      I3      I3      I4      I4      I5      I5
+M       1       7       0       1       0       7       0       1       4       5       2
+M       2       5       0       1       0       10      0       3       4       2       2
+M       3       5       0       1       0       10      0       3       4       3       2
+M       4       7       1       5       0       0       19      8       0       14      6
+M       5       17      2       12      0       29      0       8       0       27      0
+M       6       18      0       11      0       25      0       23      2       23      0
+M       7       9       2       10      0       39      0       6       0       21      0
+M       8       37      18      59      3       1       116     40      0       50      62
+M       9       7       1       13      0       0       18      2       0       8       5
+M       10      8       0       6       2       15      0       2       0       13      0
+M       11      0       22      26      4       20      0       21      0       0       24
+M       12      5       0       11      0       11      0       5       3       13      0
+M       13      37      0       39      0       44      29      41      0       83      0
+M       14      4       0       4       1       3       0       0       0       12      0
+M       20      0       0       0       1       1       5       22      1       0       0
+M       21      0       0       0       1       1       5       22      1       0       0
+M       22      63      8       33      3       126     19      58      18      118     14
+M       23      49      23      29      5       103     38      46      31      101     30
+M       24      68      9       34      2       122     25      58      23      126     14
+M       25      61      15      33      5       120     28      55      26      112     28
+
+
+###################################
+# Haplotype phased with DBM
+###################################
+
+/home/s_m774/1000GenomeData/dbm
+
+time /home/s_m774/software/DBM/dbm chr10.5sample
+sbatch dbm.batch
+Submitted batch job 374583
+
+real    17m40.317s
+user    17m23.789s
+sys     0m16.360s
+
+# chr10.5sample.g
+ID CHR POS 28 10 50 13 36 7 50 6 52 0       # DBM gives each haplotype a randome name in the header  
+1 chr10 10423 C T T T T T C T C T
+2 chr10 10430 C C C A C C C C C C
+3 chr10 10458 C T T C C T C T T T
+4 chr10 10463 G C G G G G G C G C
+5 chr10 10483 C A A C A C C A A A
+
+# Split each sample
+sed '1d' chr10.5sample.g > noHeader.chr10.5sample.g
+cut -f 4,5 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.10837.chr10.txt
+cut -f 6,7 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.10855.chr10.txt
+cut -f 8,9 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12329.chr10.txt
+cut -f 10,11 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12752.chr10.txt
+cut -f 12,13 -d ' ' noHeader.chr10.5sample.g > individuals/dbm.genotype.12878.chr10.txt
+T T
+C C
+A A
+A G
+G G
+C C
+C C
+T C
+T C
+
+wc -l *
+ 359320 dbm.genotype.10837.chr10.txt
+ 359320 dbm.genotype.10855.chr10.txt
+ 359320 dbm.genotype.12329.chr10.txt
+ 359320 dbm.genotype.12752.chr10.txt
+ 359320 dbm.genotype.12878.chr10.txt
+
+#################################################
+# Compared the haplotype agreement of 3 packages
+#################################################
+
+cp whatshap/results/individuals/* compare/
+cp whatshap/results/haplotypes/* compare/
+cp hapseq2/results/individuals/* compare/
+cp dbm/individuals/* compare/
+
+# Haplotypes
+
+Pasted 3 packages into a single file to eyeball agreements
+paste dbm.genotype.10837.chr10.txt hapseq2.genotype.10837.chr10.txt whatshap.haplotype.10837.chr10.txt > R/10837.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.10855.chr10.txt hapseq2.genotype.10855.chr10.txt whatshap.haplotype.10855.chr10.txt > R/10855.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12329.chr10.txt hapseq2.genotype.12329.chr10.txt whatshap.haplotype.12329.chr10.txt > R/12329.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12752.chr10.txt hapseq2.genotype.12752.chr10.txt whatshap.haplotype.12752.chr10.txt > R/12752.dbm.hapseq2.whatshap.6col.txt
+paste dbm.genotype.12878.chr10.txt hapseq2.genotype.12878.chr10.txt whatshap.haplotype.12878.chr10.txt > R/12878.dbm.hapseq2.whatshap.6col.txt
+
+# Columns Key
+DBM DBM2 HAP HAP2 WHP WHP2
+T T     T T     T T
+C C     C C     C C
+A A     A A     A A
+A G     G A     G A
+G G     G G     G T
+C C     C C     C C
+C C     T C     - -
+T C     T C     C T
+
+module load R/3.6.0  
+R -f compareHaplotype.r > pairwiseHaplotype.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Genotypes
+# Whatshap vs DBM
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10837.chr10.txt whatshap.genotype.10837.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10855.chr10.txt whatshap.genotype.10855.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12329.chr10.txt whatshap.genotype.12329.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12752.chr10.txt whatshap.genotype.12752.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12878.chr10.txt whatshap.genotype.12878.chr10.txt;
+
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10837.chr10.txt whatshap.genotype.10837.chr10.txt;
+Strict genotype agreement: 149205/359320
+Non-Strict genotype agreement: 222983/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10855.chr10.txt whatshap.genotype.10855.chr10.txt;
+Strict genotype agreement: 148818/359320
+Non-Strict genotype agreement: 222094/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12329.chr10.txt whatshap.genotype.12329.chr10.txt;
+Strict genotype agreement: 150511/359320
+Non-Strict genotype agreement: 223129.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12752.chr10.txt whatshap.genotype.12752.chr10.txt;
+Strict genotype agreement: 150209/359320
+Non-Strict genotype agreement: 223730.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12878.chr10.txt whatshap.genotype.12878.chr10.txt;
+Strict genotype agreement: 150246/359320
+Non-Strict genotype agreement: 223426.5/359320
+
+# Whatshap vs Hapseq2
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.10837.chr10.txt whatshap.genotype.10837.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.10855.chr10.txt whatshap.genotype.10855.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12329.chr10.txt whatshap.genotype.12329.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12752.chr10.txt whatshap.genotype.12752.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12878.chr10.txt whatshap.genotype.12878.chr10.txt;
+
+perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.10837.chr10.txt whatshap.genotype.10837.chr10.txt;
+Strict genotype agreement: 348869/359320
+Non-Strict genotype agreement: 354051.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.10855.chr10.txt whatshap.genotype.10855.chr10.txt;
+Strict genotype agreement: 348860/359320
+Non-Strict genotype agreement: 354059/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12329.chr10.txt whatshap.genotype.12329.chr10.txt;
+Strict genotype agreement: 348007/359320
+Non-Strict genotype agreement: 353620/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12752.chr10.txt whatshap.genotype.12752.chr10.txt;
+Strict genotype agreement: 348584/359320
+Non-Strict genotype agreement: 353916.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl hapseq2.genotype.12878.chr10.txt whatshap.genotype.12878.chr10.txt;
+Strict genotype agreement: 348098/359320
+Non-Strict genotype agreement: 353669.5/359320
+
+# Hapseq2 vs DBM
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10837.chr10.txt hapseq2.genotype.10837.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10855.chr10.txt hapseq2.genotype.10855.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12329.chr10.txt hapseq2.genotype.12329.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12752.chr10.txt hapseq2.genotype.12752.chr10.txt;
+perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12878.chr10.txt hapseq2.genotype.12878.chr10.txt;
+
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10837.chr10.txt hapseq2.genotype.10837.chr10.txt;
+Strict genotype agreement: 149902/359320
+Non-Strict genotype agreement: 224952.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.10855.chr10.txt hapseq2.genotype.10855.chr10.txt;
+Strict genotype agreement: 149047/359320
+Non-Strict genotype agreement: 223898/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12329.chr10.txt hapseq2.genotype.12329.chr10.txt;
+Strict genotype agreement: 150282/359320
+Non-Strict genotype agreement: 224718.5/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12752.chr10.txt hapseq2.genotype.12752.chr10.txt;
+Strict genotype agreement: 149983/359320
+Non-Strict genotype agreement: 225246/359320
+(base) [s_m774@login2 compare]$ perl /home/s_m774/Haplotype-Research/getPoints.pl dbm.genotype.12878.chr10.txt hapseq2.genotype.12878.chr10.txt;
+Strict genotype agreement: 150719/359320
+Non-Strict genotype agreement: 225246/359320
