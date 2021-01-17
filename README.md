@@ -1,2 +1,2 @@
-# Record of progress in Sun Lab
-## Includes scripts created
+# Record of progress in Dr. Shuying Sun Lab
+## Includes created and used scripts
