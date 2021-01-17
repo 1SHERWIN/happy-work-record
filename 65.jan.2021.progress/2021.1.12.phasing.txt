@@ -1,0 +1,76 @@
+###############################################
+Download three IGSR samples from here:
+https://www.internationalgenome.org/data-portal/sample/NA12873
+https://www.internationalgenome.org/data-portal/sample/NA12874
+https://www.internationalgenome.org/data-portal/sample/NA12878
+###############################################
+
+pwd
+/home/s_m774/known_truth
+
+# IGSR samples downloaded on chromosome 10
+-b convert to bam
+-h keep the header
+-o output 
+
+time samtools view -bh -o chr10.hg38.NA12873.bam ftp:/­/­ftp.­sra.­ebi.­ac.­uk/­vol1/­run/­ERR323/­ERR3239332/­NA12873.­final.­cram chr10
+time samtools view -bh -o chr10.hg38.NA12874.bam ftp:/­/­ftp.­sra.­ebi.­ac.­uk/­vol1/­run/­ERR323/­ERR3239333/­NA12874.­final.­cram chr10
+time samtools view -bh -o chr10.hg38.NA12878.bam ftp:/­/­ftp.­sra.­ebi.­ac.­uk/­vol1/­run/­ERR323/­ERR3239334/­NA12878.­final.­cram chr10
+
+real    7m2.589s
+user    6m23.852s
+sys     0m3.066s
+
+(happy) [s_m774@login1 1000GenomeData]$ du -h *
+2.4G    chr10.hg38.NA12873.bam
+1.9G    chr10.hg38.NA12874.bam
+1.8G    chr10.hg38.NA12878.bam
+
+wc -l *
+  10,030,750 chr10.hg38.NA12873.bam
+   8,047,094 chr10.hg38.NA12874.bam
+   7,792,114 chr10.hg38.NA12878.bam
+
+#######################################################
+# BCFtools 
+#######################################################
+
+pwd
+/home/s_m774/known_truth
+
+# setup directories
+/home/s_m774/genome-phasing/mkdir.sh
+
+# call SNV
+sbatch /home/s_m774/genome-phasing/3sample.bcftools.batch
+
+
+#######################################################
+# Intersect positions with known truth
+#######################################################
+
+
+
+
+
+#######################################################
+# Whatshap, Hapseq2, and DBM
+#######################################################
+
+pwd
+/home/s_m774/known_truth
+
+cp snv/5sample.chr10.vcf whatshap/
+cp snv/5sample.chr10.vcf hapseq2/
+cp snv/5sample.chr10.vcf dbm/
+cp *.ba* whatshap/
+cp *.ba* hapseq2/
+
+
+
+#######################################################
+# Pairwise comparison of haplotypes
+#######################################################
+
+
+
