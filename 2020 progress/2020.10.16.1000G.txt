@@ -1,0 +1,110 @@
+[s_m774@login1 1000GenomeData]$ pwd
+/home/s_m774/1000GenomeData
+
+# Install Miniconda and samtools and whatshap 
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+chmod 755 Miniconda2-latest-Linux-x86_64.sh
+./Miniconda2-latest-Linux-x86_64.sh
+
+(base) [s_m774@login1 ~]$ conda create -n happy samtools whatshap
+(base) [s_m774@login1 ~]$ conda activate happy
+
+
+# NA12878 is 15.7GB in cram
+[s_m774@login1 1000GenomeData]$ wget --spider ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239334/NA12878.final.cram
+==> SIZE NA12878.final.cram ... 15797182294
+
+# get IGSR sample on chromosome 10
+http://www.htslib.org/doc/samtools-view.html
+-b convert to bam
+-h keep the header
+-o output 
+
+samtools view -bh -o NA12878.chr10.bam ftp:/­/­ftp.­sra.­ebi.­ac.­uk/­vol1/­run/­ERR323/­ERR3239334/­NA12878.­final.­cram chr10
+
+[W::cram_populate_ref] Creating reference cache directory /home/s_m774/.cache/hts-ref
+This may become large; see the samtools(1) manual page REF_CACHE discussion
+
+[s_m774@login1 1000GenomeData]$ ls
+chr10.fa  hg38.fa  NA12878.chr10.bam  NA12878.final.cram.crai  trash
+
+
+
+
+# call SNPs using bcftools mpileup, filter SNPs using bcftools call, filter high quality using query
+
+cp /group/hon/hon3398o/0.course.files/software/bcftools-1.9/bcftools ./
+
+mpileup
+# -g Genotype to BCF output
+# -f FASTA format index
+# -a AD annotate Allele Depth (needed for DBM input)
+# -a DP annotate Depth
+# -I Indels are skipped
+# -b bam list
+
+view
+# -i 'DP>=20' include
+
+call
+# -c consensus caller
+# -v variant sites only output
+# --skip-variants indels
+# --ploidy GRCh38 to specify diploid
+# -o output file
+
+./bcftools mpileup -a AD -f chr10.fa NA12878.chr10.bam | ./bcftools view -i 'DP>=20' | ./bcftools call -cv --skip-variants indels --ploidy GRCh38 -o chr10.NA12878.vcf
+
+(happy) [s_m774@login1 1000GenomeData]$ grep -v "#" chr10.NA12878.vcf | wc -l
+190783
+
+###################################
+# Haplotype phased with Whatshap
+###################################
+
+time samtools index NA12878.chr10.bam
+real    0m17.075s
+user    0m16.424s
+sys     0m0.517s
+
+
+(happy) [s_m774@login1 1000GenomeData]$ time whatshap phase -r chr10.fa -o results/Whatshap.phased.NA12878.vcf chr10.NA12878.vcf NA12878.chr10.bam
+This is WhatsHap 1.0 running under Python 3.8.6
+Working on 1 samples from 1 family
+======== Working on chromosome 'chr10'
+---- Processing individual NA12878
+Using maximum coverage per sample of 15X
+Number of variants skipped due to missing genotypes: 0
+Number of remaining heterozygous variants: 121552
+Reading alignments for sample 'NA12878' and detecting alleles ...
+Found 2906775 reads covering 121550 variants
+Kept 793363 reads that cover at least two variants each
+Reducing coverage to at most 15X by selecting most informative reads ...
+Selected 267491 reads covering 97516 variants
+Best-case phasing would result in 21211 non-singleton phased blocks (21211 in total)
+... after read selection: 21224 non-singleton phased blocks (21224 in total)
+Variants covered by at least one phase-informative read in at least one individual after read selection: 97516
+Phasing 1 sample by solving the MEC problem ...
+MEC cost: 276960
+No. of phased blocks: 21224
+Largest component contains 2518 variants (2.6% of accessible variants) between position 38579089 and 42302007
+======== Writing VCF
+Done writing VCF
+
+== SUMMARY ==
+Maximum memory usage: 3.188 GB
+Time spent reading BAM/CRAM:                  257.7 s
+Time spent parsing VCF:                         2.5 s
+Time spent selecting reads:                   158.1 s
+Time spent phasing:                           339.1 s
+Time spent writing VCF:                         3.6 s
+Time spent finding components:                  1.4 s
+Time spent on rest:                            20.6 s
+Total elapsed time:                           783.1 s
+
+real    13m5.364s
+user    12m57.917s
+sys     0m6.922s
+
+
+
